@@ -1,0 +1,119 @@
+<?php
+
+namespace Netvlies\Bundle\AdminExtensionsBundle\Datagrid;
+
+use Sonata\AdminBundle\Admin\BaseFieldDescription;
+
+class TypeFieldDescription extends BaseFieldDescription
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct()
+    {
+        $this->parentAssociationMappings = array();
+    }
+
+    /**
+     * Define the association mapping definition
+     *
+     * @param array $associationMapping
+     * @return void
+     */
+    public function setAssociationMapping($associationMapping)
+    {
+        if (!is_array($associationMapping)) {
+           throw new \RuntimeException('The association mapping must be an array');
+        }
+
+        $this->associationMapping = $associationMapping;
+
+        if(isset($associationMapping['type'])){
+            $this->type         = $this->type ?: $associationMapping['type'];
+            $this->mappingType  = $this->mappingType ?: $associationMapping['type'];
+        } else if(array_key_exists('referenceType', $associationMapping)){
+            $this->type         = $this->type ?: \Doctrine\ODM\PHPCR\Mapping\ClassMetadata::MANY_TO_ONE;
+            $this->mappingType  = $this->mappingType ?: \Doctrine\ODM\PHPCR\Mapping\ClassMetadata::MANY_TO_ONE;
+        } else {
+            throw new \RuntimeException('Unknown association mapping type');
+        }
+        $this->fieldName    = $associationMapping['fieldName'];
+    }
+
+    /**
+     * return the related Target Entity
+     *
+     * @return string|null
+     */
+    public function getTargetEntity()
+    {
+        if ($this->associationMapping) {
+            return $this->associationMapping['targetDocument'];
+        }
+
+        return null;
+    }
+
+    /**
+     * set the field mapping information
+     *
+     * @param array $fieldMapping
+     * @return void
+     */
+    public function setFieldMapping($fieldMapping)
+    {
+        if (!is_array($fieldMapping)) {
+            throw new \RuntimeException('The field mapping must be an array');
+        }
+
+        $this->fieldMapping = $fieldMapping;
+
+        $this->type         = $this->type ?: $fieldMapping['type'];
+        $this->mappingType  = $this->mappingType ?: $fieldMapping['type'];
+        $this->fieldName    = $this->fieldName ?: $fieldMapping['fieldName'];
+    }
+
+    /**
+     * return true if the FieldDescription is linked to an identifier field
+     *
+     * @return bool
+     */
+    public function isIdentifier()
+    {
+        return isset($this->fieldMapping['id']) ? $this->fieldMapping['id'] : false;
+    }
+
+    /**
+     * return the value linked to the description
+     *
+     * @param mixed $object
+     *
+     * @return bool|mixed
+     */
+    public function getValue($object)
+    {
+        foreach ($this->parentAssociationMappings as $parentAssociationMapping) {
+            $object = $this->getFieldValue($object, $parentAssociationMapping['fieldName']);
+        }
+
+        return $this->getAdmin()->getSubAdmin($object)->getLabel();
+    }
+
+    /**
+     * set the parent association mappings information
+     *
+     * @param array $parentAssociationMappings
+     *
+     * @return void
+     */
+    public function setParentAssociationMappings(array $parentAssociationMappings)
+    {
+        foreach ($parentAssociationMappings as $parentAssociationMapping) {
+            if (!is_array($parentAssociationMapping)) {
+                throw new \RuntimeException('An association mapping must be an array');
+            }
+        }
+
+        $this->parentAssociationMappings = $parentAssociationMappings;
+    }
+}

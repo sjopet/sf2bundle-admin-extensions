@@ -1,0 +1,27 @@
+{#
+
+(c) Netvlies Internetdiensten
+ 
+@author Sjoerd Peters <speters@netvlies.nl>
+ 
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+
+{% extends base_template %}
+
+{% block title %}Selecteer het type{% endblock %}
+
+{% block content %}
+    <p><b>Selecteer een type</b></p>
+    <ul style="list-style-type: none;">
+    {% block select_type %}
+        {% for type, subAdmin in types %}
+            <li><a href="{{ subAdmin.generateUrl('create') }}">{{ subAdmin.label }}</a></li>
+        {% else %}
+            <li>Geen types beschikbaar</li>
+        {% endfor %}
+    {% endblock %}
+    </ul>
+{% endblock %}
