@@ -10,7 +10,7 @@
 
 namespace Netvlies\Bundle\AdminExtensionsBundle\Controller;
 
-use Netvlies\Bundle\OmsBundle\Controller\CRUDController;
+use Sonata\AdminBundle\Controller\CRUDController;
 
 class GroupAdminController extends CRUDController
 {

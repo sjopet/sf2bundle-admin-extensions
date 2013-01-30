@@ -18,24 +18,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ODM\PHPCR\DocumentManager;
 use PHPCR\Query\QOM\QueryObjectModelConstantsInterface as Constants;
 
-use Netvlies\Bundle\AdminExtensionsBundle\Datagrid\ProxyQuery;
+//use Netvlies\Bundle\AdminExtensionsBundle\Datagrid\ProxyQuery;
+use Sonata\DoctrinePHPCRAdminBundle\Datagrid\ProxyQuery;
 use Netvlies\Bundle\AdminExtensionsBundle\Datagrid\TypeFieldDescription;
 
 class GroupAdmin extends Admin
 {
     /** @var $listFieldTemplate string */
     protected $listFieldTemplate = 'NetvliesAdminExtensionsBundle:Sonata:Admin/CRUD/base_list_field.html.twig';
-
-    /** @var \Doctrine\ODM\PHPCR\DocumentManager $dm */
-    protected $dm;
-
-    /**
-     * @param \Doctrine\ODM\PHPCR\DocumentManager $dm
-     */
-    public function __construct(DocumentManager $dm)
-    {
-        $this->dm = $dm;
-    }
 
     /**
      * @param \Sonata\AdminBundle\Datagrid\DatagridMapper $datagridMapper
@@ -68,21 +58,26 @@ class GroupAdmin extends Admin
      */
     public function createQuery($context = 'list')
     {
-        $qb = $this->dm->createQueryBuilder();
-        $qmf = $qb->getQOMFactory();
-        $query = new ProxyQuery($qmf, $qb);
-        $query->setDocumentManager($this->dm);
+        $dm = $this->getModelManager()->getDocumentManager();
+        $qb = $dm->createQueryBuilder();
+//        $qmf = $qb->getQOMFactory();
+        $query = new ProxyQuery($qb);
+        $query->setDocumentManager($dm);
 
         $constraint = null;
+        echo "<pre>";
+        var_dump($this->getSubClasses());
+        echo "</pre>";
+        die;
         foreach ($this->getSubClasses() as $class => $admin) {
-            $condition = $qmf->comparison($qmf->propertyValue('phpcr:class'), Constants::JCR_OPERATOR_EQUAL_TO, $qmf->literal($class));
+            $condition = $qb->comparison($qb->propertyValue('phpcr:class'), Constants::JCR_OPERATOR_EQUAL_TO, $qb->literal($class));
             if ($constraint) {
-                $constraint = $qmf->orConstraint($constraint, $condition);
+                $constraint = $qb->orConstraint($constraint, $condition);
             } else {
                 $constraint = $condition;
             }
         }
-        $qb->from($qmf->selector('nt:unstructured'));
+//        $qb->from($qb->selector('nt:unstructured'));
         $qb->andWhere($constraint);
 
         return $query;
