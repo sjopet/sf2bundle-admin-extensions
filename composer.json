@@ -1,5 +1,5 @@
 {
-    "name": "netvlies/AdminExtensions",
+    "name": "sjopet/sf2bundle-admin-extensions",
     "type": "symfony-bundle",
     "description": "Symfony NetvliesAdminExtensionsBundle",
     "keywords": ["netvlies", "sonata", "admin"],
