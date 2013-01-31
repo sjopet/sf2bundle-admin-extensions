@@ -1,12 +1,12 @@
 <?php
 /**
- * (c) Netvlies Internetdiensten
- *
- * @author M. de Krijger <mdekrijger@netvlies.nl>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+* (c) Netvlies Internetdiensten
+*
+* @author Sjoerd Peters <speters@netvlies.net>
+*
+* For the full copyright and license information, please view the LICENSE
+* file that was distributed with this source code.
+*/
 
 namespace Netvlies\Bundle\AdminExtensionsBundle\Admin\Extension;
 
@@ -41,8 +41,7 @@ class GroupAdminListExtension extends AdminExtension
         $rc->add('list', '/list');
 
         /*
-         * @todo it works but wtf @ the url's that are generated from this
-         * @todo also the showAction override in controller is bs and should not be needed
+         * @todo the showAction override in controller is weird and should not be needed
          */
 
         $collection->remove('list');

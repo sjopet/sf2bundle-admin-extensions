@@ -1,8 +1,8 @@
 <?php
-/*
+/**
 * (c) Netvlies Internetdiensten
 *
-* Sven de Bie <sven@netvlies.net>
+* @author Sjoerd Peters <speters@netvlies.net>
 *
 * For the full copyright and license information, please view the LICENSE
 * file that was distributed with this source code.
@@ -13,13 +13,10 @@ namespace Netvlies\Bundle\AdminExtensionsBundle\Admin;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\DoctrinePHPCRAdminBundle\Admin\Admin;
+use Sonata\DoctrinePHPCRAdminBundle\Datagrid\ProxyQuery;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ODM\PHPCR\DocumentManager;
-use PHPCR\Query\QOM\QueryObjectModelConstantsInterface as Constants;
-
-//use Netvlies\Bundle\AdminExtensionsBundle\Datagrid\ProxyQuery;
-use Sonata\DoctrinePHPCRAdminBundle\Datagrid\ProxyQuery;
 use Netvlies\Bundle\AdminExtensionsBundle\Datagrid\TypeFieldDescription;
 
 class GroupAdmin extends Admin
@@ -33,7 +30,7 @@ class GroupAdmin extends Admin
     protected function configureDatagridFilters(DatagridMapper $datagridMapper)
     {
         $datagridMapper
-            ->add('title', 'doctrine_phpcr_string', array('label' => 'Titel'))
+            ->add('id', 'doctrine_phpcr_string', array('label' => 'ID'))
             ->add('type', 'doctrine_phpcr_string', array('label' => 'Type'))
         ;
     }
@@ -47,39 +44,28 @@ class GroupAdmin extends Admin
         $typeField->setFieldName('type');
 
         $listMapper
-            ->addIdentifier('title', 'text', array('label' => 'Titel', 'template' => $this->listFieldTemplate))
+            ->addIdentifier('id', 'text', array('label' => 'ID', 'template' => $this->listFieldTemplate))
             ->add($typeField, 'text', array('label' => 'Type', 'template' => $this->listFieldTemplate))
         ;
     }
 
     /**
      * @param string $context
-     * @return \Netvlies\Bundle\AdminExtensionsBundle\Datagrid\ProxyQuery
+     * @return ProxyQuery
      */
     public function createQuery($context = 'list')
     {
         $dm = $this->getModelManager()->getDocumentManager();
+        /** @var \Doctrine\ODM\PHPCR\Query\QueryBuilder $qb */
         $qb = $dm->createQueryBuilder();
-//        $qmf = $qb->getQOMFactory();
         $query = new ProxyQuery($qb);
         $query->setDocumentManager($dm);
+        $qb->nodeType('nt:unstructured');
 
-        $constraint = null;
-        echo "<pre>";
-        var_dump($this->getSubClasses());
-        echo "</pre>";
-        die;
         foreach ($this->getSubClasses() as $class => $admin) {
-            $condition = $qb->comparison($qb->propertyValue('phpcr:class'), Constants::JCR_OPERATOR_EQUAL_TO, $qb->literal($class));
-            if ($constraint) {
-                $constraint = $qb->orConstraint($constraint, $condition);
-            } else {
-                $constraint = $condition;
-            }
+            $exp = $qb->expr()->eq('phpcr:class', $class);
+            $qb->orWhere($exp);
         }
-//        $qb->from($qb->selector('nt:unstructured'));
-        $qb->andWhere($constraint);
-
         return $query;
     }
 
@@ -90,9 +76,25 @@ class GroupAdmin extends Admin
     public function getSubAdmin($name)
     {
         if(is_object($name)){
-            $name = get_class($name);
+            $name = ($name instanceof \Doctrine\ODM\PHPCR\Proxy\Proxy) ? get_parent_class($name) : get_class($name);
         }
         return parent::getSubClass($name);
+    }
+
+    /**
+     * Because of the structure of the subclasses array
+     * We need to change this function slightly
+     *
+     * @param  string $name The name of the sub class
+     * @return string the subclass
+     */
+    protected function getSubClass($name)
+    {
+        if ($this->hasSubClass($name)) {
+            return $name;
+        }
+
+        return null;
     }
 
 }

@@ -1,5 +1,12 @@
 <?php
-
+/**
+* (c) Netvlies Internetdiensten
+*
+* @author Sjoerd Peters <speters@netvlies.net>
+*
+* For the full copyright and license information, please view the LICENSE
+* file that was distributed with this source code.
+*/
 namespace Netvlies\Bundle\AdminExtensionsBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;

@@ -11,8 +11,19 @@
              </call>
          </service>
 
-        <!--<argument type="service" id="doctrine_phpcr.odm.document_manager" />-->
-
          <service id="netvlies.admin.group.extension" class="Netvlies\Bundle\AdminExtensionsBundle\Admin\Extension\GroupAdminListExtension" />
+
+        <service id="symfony_cmf_block.group_admin" class="Netvlies\Bundle\AdminExtensionsBundle\Admin\GroupAdmin">
+            <tag name="sonata.admin" manager_type="doctrine_phpcr" group="dashboard.group_content" label="Block Group"/>
+            <tag name="netvlies.group_admin"/>
+            <argument/>
+            <argument>Symfony\Cmf\Bundle\BlockBundle\Document\BaseBlock</argument>
+            <!--<argument>NetvliesAdminExtensionsBundle:GroupAdmin</argument>-->
+            <argument>SonataAdminBundle:CRUD</argument>
+
+            <call method="setRouteBuilder">
+                <argument type="service" id="sonata.admin.route.path_info_slashes" />
+            </call>
+        </service>
     </services>
 </container>
